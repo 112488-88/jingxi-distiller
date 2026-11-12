@@ -1,0 +1,29 @@
+{
+  "name": "鲸汐提炼器 · 消息重点提取",
+  "short_name": "鲸汐提炼器",
+  "description": "把乱糟糟的聊天记录 / 邮件 / 通知，压成「结论 · 要点 · 待办 · 风险」四块卡片，还能问原文。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#f5f7fb",
+  "theme_color": "#3f6bfa",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "新建提炼",
+      "short_name": "新提炼",
+      "description": "清空当前内容，开始一次新的提炼",
+      "url": "./index.html?action=new",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

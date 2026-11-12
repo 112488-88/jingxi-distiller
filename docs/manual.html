@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>鲸汐提炼器 · 使用说明</title><style>
+@page { size: A4; margin: 18mm 16mm 16mm; }
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0;
+  font-family: -apple-system, "Segoe UI", system-ui, "Microsoft YaHei", sans-serif;
+  font-size: 10.5pt; line-height: 1.75; color: #1f2430;
+  background: #fff;
+}
+h1.doc-title { font-size: 24pt; margin: 6mm 0 3mm; letter-spacing: .5px; color: #0e1729; }
+h2 { font-size: 15pt; color: #2f57e0; margin: 9mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 1px solid #e6eaf1; page-break-after: avoid; }
+h3 { font-size: 12pt; color: #1f2a3f; margin: 6mm 0 2mm; page-break-after: avoid; }
+p { margin: 0 0 2.4mm; }
+ul { margin: 0 0 2.4mm; padding-left: 6mm; }
+li { margin: 0 0 1.4mm; }
+code { font-family: Consolas, "Cascadia Mono", monospace; font-size: 9.5pt; color: #243a6b; background: #f4f6fa; padding: 0 1.2mm; border-radius: 2px; }
+pre { margin: 3mm 0; padding: 3mm 4mm; background: #f4f6fa; border-left: 3px solid #9aa8c0; border-radius: 3px; font-size: 9pt; line-height: 1.55; white-space: pre-wrap; page-break-inside: avoid; }
+pre code { background: none; padding: 0; }
+blockquote { margin: 3mm 0; padding: 2.5mm 4mm; background: #fff8e6; border-left: 3.5px solid #e0a63a; border-radius: 0 3px 3px 0; page-break-inside: avoid; }
+blockquote p { margin: 0; }
+blockquote b.lbl { color: #a5600a; font-size: 9pt; }
+table { width: 100%; border-collapse: collapse; margin: 3mm 0 4mm; font-size: 9.5pt; page-break-inside: auto; }
+th, td { border: 1px solid #d8e0ec; padding: 1.8mm 2.4mm; text-align: left; vertical-align: top; }
+th { background: #eef2fa; font-weight: 600; color: #0e1729; }
+tr { page-break-inside: avoid; }
+hr { border: 0; border-top: 1px solid #e6eaf1; margin: 6mm 0; }
+.tip { color: #6b768a; font-size: 9.5pt; }
+@media screen {
+  html { background: #f5f7fb; }
+  body { max-width: 210mm; margin: 0 auto; padding: 18mm 16mm 16mm; background: #fff; box-shadow: 0 2px 20px rgba(14,23,41,.08); }
+}
+</style></head><body>
+<h1 class="doc-title">鲸汐提炼器 · 使用说明</h1>
+<p>一句话：把一段乱糟糟的长消息（群聊、邮件、会议纪要）变成四块卡片，10 秒看完——发生了什么、我要做什么、哪里有坑。</p>
+<ul><li>纯前端，双击 <code>index.html</code> 就能用，不装软件、不开服务</li><li>零依赖，不连数据库，只读你手动给的导出文件或粘贴内容</li><li>唯一对外请求是 DeepSeek 的 <code>deepseek-chat</code> 接口</li></ul>
+<hr>
+<h2>一、装在哪、怎么打开</h2>
+<h3>想装成 App（推荐）</h3>
+<p>给它一个 http(s) 地址（GitHub Pages / 自己的服务器 / 局域网都行），打开之后：</p>
+<ul><li><strong>Chrome / Edge</strong>：地址栏右侧出现「安装」图标 → 点一下，装成独立窗口的 App，任务栏/开始菜单有图标</li><li><strong>安卓</strong>：浏览器菜单里「添加到主屏幕」</li><li><strong>iPhone</strong>：Safari 分享 → 「添加到主屏幕」</li></ul>
+<p>装好之后<strong>离线也能开</strong>（Service Worker 缓存了程序本身；提炼还是要联网调 DeepSeek）。</p>
+<p>双击 <code>index.html</code> 的方式依旧可用，只是没有「安装 / 离线」这两项。</p>
+<p>所有文件都在 <code>.\</code>。</p>
+<table><thead><tr><th>文件</th><th>作用</th><th>能不能删</th></tr></thead><tbody><tr><td><code>index.html</code></td><td>入口，双击打开</td><td>不能</td></tr><tr><td><code>style.css</code></td><td>样式（深浅色都在里面）</td><td>不能</td></tr><tr><td><code>app.js</code></td><td>界面逻辑、调接口、渲染卡片</td><td>不能</td></tr><tr><td><code>parse.js</code></td><td>聊天记录解析器</td><td>不能</td></tr><tr><td><code>tone.js</code></td><td>语气 / 身份推断</td><td>不能</td></tr><tr><td><code>parsers/merged-forward.js</code></td><td>合并转发外壳剥离</td><td>不能</td></tr><tr><td><code>prompts.js</code></td><td><strong>提示词都在这里</strong>，想调效果改它</td><td>不能</td></tr><tr><td><code>README.md</code></td><td>技术说明（给我看的）</td><td>可删</td></tr><tr><td><code>使用说明.md</code> / <code>使用说明.docx</code></td><td>就是这份</td><td>可删</td></tr></tbody></table>
+<p>打开方式：双击 <code>index.html</code>（推荐 Chrome / Edge）。想放桌面就右键 <code>index.html</code> → 发送到 → 桌面快捷方式。</p>
+<hr>
+<h2>二、第一次使用：三步</h2>
+<h3>第 1 步：拿一个 API Key</h3>
+<p>打开 https://platform.deepseek.com → 左侧「API keys」→ 创建 → 复制 <code>sk-</code> 开头那串（只显示一次，别关窗口）。</p>
+<h3>第 2 步：填进工具里</h3>
+<p>页面右上角点<strong>钥匙图标</strong> → 粘贴 → 保存。</p>
+<ul><li>保存后右上角变绿点 +「Key 已保存」</li><li>Key 只存在这台电脑的浏览器里，关掉再开还在</li><li>换电脑、换浏览器要重新填</li></ul>
+<h3>第 3 步：跑一次样例</h3>
+<p>点页面中间那行小按钮「群聊 · 筹备进度」→ 内容自动填进去 → 点「一键提炼」。</p>
+<p>第一次跑大概 3–10 秒。出卡片就说明通了。</p>
+<blockquote><p><b class="lbl">提示　</b>别一上来就点「一键提炼」空输入框，会提示你「先粘点东西进来」。</p></blockquote>
+<hr>
+<h2>三、四种输入方式</h2>
+<blockquote><p><b class="lbl">提示　</b><strong>粘贴不会乱改你的类型</strong>：只有「真的像聊天记录」（能解析出 2 条以上消息）才会自动变成附件；公文、通知、邮件正文这类会留在输入框里当普通文本，类型自动切到「通用文本」。</p></blockquote>
+<blockquote><p><b class="lbl">提示　</b>你自己点过「邮件 / 会议纪要 / 通用」之后，换解析器、重新解析都不会把它改回去。</p></blockquote>
+<blockquote><p><b class="lbl">提示　</b>另外，点「移除附件」会把原文放回输入框，不会连内容一起清掉。</p></blockquote>
+<table><thead><tr><th>方式</th><th>怎么做</th><th>适合</th></tr></thead><tbody><tr><td>拖文件</td><td>把 <code>.html</code> / <code>.csv</code> / <code>.txt</code> / <code>.mht</code> 拖到页面上任何位置</td><td>微信、QQ 导出的聊天记录</td></tr><tr><td>粘贴</td><td>复制后直接 <code>Ctrl+V</code> 到输入框</td><td>微信「多选 → 复制」</td></tr><tr><td>样例</td><td>点下面的三个小按钮</td><td>先看手感</td></tr><tr><td>纯文本</td><td>手打/粘贴会议纪要、周报、邮件</td><td>非聊天内容</td></tr></tbody></table>
+<p>认不出格式的，就当普通长文本处理，跟以前一样直接进输入框。</p>
+<hr>
+<h2>四、支持哪些导出文件（自动识别，不用手选）</h2>
+<table><thead><tr><th>来源</th><th>长得像什么</th><th>chip 显示</th></tr></thead><tbody><tr><td>微信 HTML</td><td>文件里有 <code>class="message"</code> / <code>chatlog</code></td><td>微信HTML</td></tr><tr><td>微信 CSV</td><td>表头有 <code>StrTime</code> / <code>StrContent</code> / <code>NickName</code> / <code>Sender</code></td><td>微信CSV</td></tr><tr><td>QQ TXT</td><td>行首是 <code>2026-11-12 14:30:27 昵称(12345)</code></td><td>QQ TXT</td></tr><tr><td>QQ MHT</td><td>文件里有 <code>MIME-Version</code> + <code>quoted-printable</code></td><td>QQ MHT</td></tr><tr><td>合并转发</td><td>有 <code>[聊天记录]</code> 标题行，或 <code>-----原始消息-----</code> 分隔符</td><td>合并转发</td></tr><tr><td>微信多选复制</td><td>一行「昵称 + 时间」，下一行内容，成对出现</td><td>微信TXT</td></tr><tr><td>其它</td><td>—</td><td>通用文本</td></tr></tbody></table>
+<p>识别结果显示在附件那行的 chip 上。<strong>chip 就是解析器</strong>，点它下拉能换一个，换完立刻重新解析、统计跟着变。</p>
+<hr>
+<h2>五、合并转发怎么弄（重点）</h2>
+<p>微信 PC 的合并转发是<strong>卡片消息</strong>，右键没有「复制」——直接在聊天窗口多选复制，拿到的只有卡片外壳，里面内容根本没进剪贴板。</p>
+<p>正确姿势：</p>
+<ul><li><b style="color:#2f57e0">1.</b> <strong>双击</strong>那个合并转发卡片，弹出独立窗口</li><li><b style="color:#2f57e0">2.</b> 窗口里 <code>Ctrl+A</code> 全选 → <code>Ctrl+C</code> 复制</li><li><b style="color:#2f57e0">3.</b> 回来 <code>Ctrl+V</code> 粘进工具</li></ul>
+<p>粘进来的内容长这样（工具会自动剥壳）：</p>
+<pre><code>群聊的聊天记录
+[聊天记录]
+老王  2026-11-12 14:30:27
+快点啊，等半天了，周六九点前要到
+小李  2026-11-12 14:31:00
+好的
+-----原始消息-----
+小李  2026-11-12 14:33:00
+谢谢，麻烦您了
+[完]</code></pre>
+<ul><li>标题行、<code>-----原始消息-----</code>、<code>[完]</code> 会被自动去掉，还原成内层对话</li><li>转发里套转发也能剥（最多 3 层）</li><li>如果只复制到了卡片本身（只有标题没正文），工具会明确告诉你：</li></ul>
+<blockquote><p><b class="lbl">提示　</b>这是合并转发的卡片本体，内容不在剪贴板里。请双击卡片打开后 Ctrl+A 全选复制；或点开卡片逐屏截图，把截图一起拖进来。</p></blockquote>
+<p>QQ 复制出来常带 <code>-----原始消息-----</code>，同样处理；破折号分隔线（<code>——— 2026-11-12 ———</code>）也算外壳，一并剥掉。</p>
+<h3>复制出来的头部格式五花八门，工具都认</h3>
+<p>不同版本、手机端和 PC 端复制出来的「发送人 + 时间」写法不一样，下面这些都能直接拆：</p>
+<table><thead><tr><th>粘贴出来长这样</th><th>处理</th></tr></thead><tbody><tr><td><code>2026-11-12 14:30:27 老王</code></td><td>时间在前</td></tr><tr><td><code>老王 2026-11-12 14:30:27</code></td><td>昵称在前</td></tr><tr><td><code>老王（2026-11-12 14:30:27）</code></td><td>时间在括号里</td></tr><tr><td><code>[2026-11-12 14:33:00] 老王：单行内容</code></td><td>单行一条</td></tr><tr><td><code>老王 14:34</code></td><td>只有时分</td></tr><tr><td><code>14:35 老王</code></td><td>时分在前</td></tr><tr><td><code>2026-11-12 14:36:00</code> 换行 <code>老王</code> 换行 <code>内容</code></td><td>名字单独占一行，会自动补回去</td></tr><tr><td><code>老王：</code> 换行 <code>内容</code></td><td>昵称加冒号独占一行（微信多选复制最常见）</td></tr></tbody></table>
+<p>认不出来的时候不用猜：附件那行有个 <strong>「格式诊断」</strong> 按钮，点开能看到</p>
+<pre><code>识别结果：微信TXT（wechatTxt）
+总行数：13　头部 6　单行条 1　外壳 0　正文 6
+解析出消息：7 条
+──── 前 24 行分类 ────
+01 [头部] 2026-11-12 14:30:27 老王
+02 [正文] 时间在前
+03 [头部] 小李 2026-11-12 14:31:00</code></pre>
+<p>一眼就能看出工具把你的哪一行当成了头部、哪一行当成了正文。点「复制诊断文本」可以直接发给我，我按你的真实格式补规则。<strong>一条都解析不出来时，诊断会自动展开</strong>，不用你自己点。</p>
+<hr>
+<h2>六、解析结果：先预览，再提炼</h2>
+<h3>它不会偷偷丢内容</h3>
+<p>如果一段文字<strong>其实不是聊天记录</strong>（通知、公文、制度、邮件正文），哪怕解析器选错了，工具也会：</p>
+<ul><li><b style="color:#2f57e0">1.</b> 先算「认出来了多少」；</li><li><b style="color:#2f57e0">2.</b> 认出的部分太少（低于 60%）就<strong>整段按「通用文本」处理</strong>，一个字都不删；</li><li><b style="color:#2f57e0">3.</b> 在导入卡片上用黄条告诉你：<code>这段不像聊天记录：按「微信TXT」只认出了 0% 的原文，为了不少内容，已按「通用文本」整段处理（423 字，一个字都没丢）。</code></li></ul>
+<p>宁可少解析几条消息，也不删你的字。</p>
+<blockquote><p><b class="lbl">提示　</b><strong>预览是全的</strong>：导入多少条就列多少条，每条都显示完整内容，不截字（超过 300 条时才折叠尾部并写明还有几条）。</p></blockquote>
+<blockquote><p><b class="lbl">提示　</b>提炼之后右侧「原文对照」里也是全文，卡片 ⓘ 里还会标「原文 N 字（完整保存）」。</p></blockquote>
+<p>粘/拖进来后不会直接烧 API，先给你看预览：</p>
+<pre><code>合并转发.txt   [合并转发 ▾]   移除
+识别到 4 条消息 · 2 位参与者 · 11-12
+▸ 展开看前 10 条
+
+[ 确认，开始提炼 ]</code></pre>
+<p>展开后每行是：<code>原文时间</code> <code>发送人</code> <code>内容</code>。最多显示 10 条，多的会写「还有 N 条（提炼时全部都会带上）」。</p>
+<p>核对没问题再点「确认，开始提炼」。想换解析器就点 chip。</p>
+<p>解析时做的事：</p>
+<ul><li>拆成<strong>发送人 / 时间 / 内容</strong>，缺的就空着，不瞎补</li><li>同一个人连续发言、间隔 2 分钟内、中间没人插话 → 合并成一段</li><li>重复消息只留一条</li><li>媒体统一占位：<code>[图片]</code> <code>[表情]</code> <code>[语音 3"]</code> <code>[文件 报价单.pdf]</code> <code>[转账 200 元]</code></li><li><strong>具名表情原名保留</strong>：<code>[旺柴]</code> <code>[捂脸]</code> <code>[裂开]</code> <code>[强]</code> <code>[微笑]</code> 不会变成 <code>[表情]</code>，颜文字、<code>hhh</code>、<code>？？？</code> 也留着</li><li>时间内部统一成 <code>2026-11-12 14:30</code>，预览里显示原文写法（<code>14:30:27</code>）</li></ul>
+<hr>
+<h2>七、语气标注（可选，默认关）</h2>
+<p>开关在「提炼类型」那一行右侧：<code>● 语气标注</code>。</p>
+<p>点开后：</p>
+<ul><li>消息末尾出现浅灰虚线括号 <code>（催促）</code>，鼠标悬停提示「AI 推断，非原文内容」</li><li>每个说话人第一次出现的位置标身份 <code>（领导）</code> <code>（下属）</code>，一人只标一次</li><li>每条标注后面有 <code>×</code>，点掉就不再出现（刷新也不会回来）</li><li>下面还能选范围：<code>仅关键消息</code>（默认）/<code>全部消息</code></li><li>关掉开关标注消失，数据还留着，再打开会回来</li></ul>
+<p>语气只用固定 12 个词：催促 / 无奈 / 调侃 / 敷衍 / 确认 / 疑问 / 不满 / 客气 / 急迫 / 犹豫 / 兴奋 / 正式。</p>
+<p>身份只用固定 8 个：领导 / 同事 / 客户 / 下属 / 家人 / 朋友 / 陌生人 / 未知（「未知」不显示）。</p>
+<p><strong>证据不足就不标</strong>，宁可空着。语气和身份只出现在预览和提示词里，<strong>绝不会写进卡片的结论、关键信息、待办、风险正文</strong>。</p>
+<hr>
+<h2>八、三种类型给出的是三种不同的东西</h2>
+<p>以前三种类型只有一句「关注点」不同，模型自然只换措辞。现在它们是三种<strong>不同的交付物</strong>：</p>
+<table><thead><tr><th>类型</th><th>产出</th><th>独有内容</th><th>待办表头</th></tr></thead><tbody><tr><td>聊天记录</td><td><strong>聊天要点</strong></td><td>结论用口语（"老王催周六九点前到，押金还没人认"）；要点带说话人、保留口语；每条待办附<strong>原话</strong>；多一块「<strong>没人回 / 悬空</strong>」</td><td>谁 / 答应了什么 / 截止时间</td></tr><tr><td>邮件</td><td><strong>邮件摘要</strong></td><td>顶部有<strong>抬头</strong>（主题/发件人/收件人/抄送/时间）；正文用书面语；多一块「<strong>需要你回复的问题</strong>」+ 附件清单</td><td>谁 / 要做什么 / 回复期限</td></tr><tr><td>会议纪要</td><td><strong>会议纪要</strong></td><td>顶部有<strong>会议信息</strong>（时间/地点/主持/记录/参会/缺席）；议题按<strong>已决·待决·否决</strong>标注；多两块「<strong>决议</strong>」「<strong>待决事项</strong>（卡在哪、谁继续确认、什么时候）」，再加一行<strong>下次会议</strong></td><td>负责人 / 行动项 / 截止时间</td></tr><tr><td>通用文本</td><td>通用提炼</td><td>结论 + 要点 + 要做的 + 风险，按原文章节组织</td><td>负责人 / 事项 / 截止时间</td></tr></tbody></table>
+<p>依据：会议纪要按「头部信息 / 议题与结论 / 行动项 / 待决事项」的通用字段结构来写（参考 [ONES 的纪要字段说明](https://ones.cn/blog/knowledge/meeting-minutes-writing-guide-fb81ddd11501e8dd)）；</p>
+<p>邮件按「谁发的 → 要我做什么 → 要我回什么」组织；聊天记录按「谁答应了我什么、谁还没回」组织。</p>
+<h2>九、提炼前：它还会问你有什么要求</h2>
+<p>原文填进去之后（超过十几个字），要求面板会<strong>自己展开</strong>，桌宠同时冒一句：<strong>「原文够长了，顺手把要求写上？」</strong>。</p>
+<ul><li><strong>不抢光标</strong>：自动展开时焦点还在输入框里，你能继续打字，不会被打断</li><li><strong>不烦人</strong>：你点过「收起」或「就这些」之后，同一段原文再打字它不会反复弹；清空或换一段新原文才会重新展开</li><li>想主动叫出来也行：点右边桌宠，或者它头上的红点。</li></ul>
+<p>点它（或者点输入框右下角弹出的面板），可以提要求，<strong>这些要求会真的塞进提示词，影响输出</strong>：</p>
+<ul><li>预设七条，点一下就选中（可多选）：结论再短点 / 正式一点 / 最多 3 条要点 / 金额时间别漏 / 标出我要做的 / 按时间排 / 不要建议</li><li>想更细就直接写，例如「结论要能直接转发给领导」「把预算相关的都单独列出来」</li><li>点「就这些」→ 提炼按钮会变成「一键提炼（带 N 条要求）」，点下去这些要求会被写进 system 提示词和 user 消息两处</li><li>不想提要求就直接点提炼，提示词不会多出任何空段落</li></ul>
+<p>提炼完，卡片右上角 ⓘ 里会显示这次是按什么要求做的，方便回头核对。</p>
+<blockquote><p><b class="lbl">提示　</b>桌宠默认贴在<strong>输入框右侧</strong>；拖走之后就停在原地，<strong>双击它</strong>可以贴回去。</p></blockquote>
+<h2>十、卡片怎么读</h2>
+<p>四块固定顺序：</p>
+<ul><li><b style="color:#2f57e0">1.</b> <strong>一句话结论</strong>——黄色高亮块，30 字以内</li><li><b style="color:#2f57e0">2.</b> <strong>关键信息</strong>——3–6 条，每条下面有「▸ 原文」可核对</li><li><b style="color:#2f57e0">3.</b> <strong>待办事项</strong>——三列表格：负责人 / 事项 / 截止时间</li><li><b style="color:#2f57e0">4.</b> <strong>风险与分歧</strong>——坑、没定的事、要确认的事</li><li><b style="color:#2f57e0">5.</b> （有多个话题时）<strong>话题分块</strong>——按话题给小标题分组</li></ul>
+<h3>四种标记怎么看</h3>
+<table><thead><tr><th>标记</th><th>含义</th><th>长什么样</th></tr></thead><tbody><tr><td>高亮块</td><td>核心结论</td><td>左侧琥珀竖条 + 淡底纹</td></tr><tr><td>波浪线 <code>▲</code></td><td>需确认（风险 / 未定 / 含糊）</td><td>红色波浪下划线 + 三角</td></tr><tr><td>双下划线</td><td>硬信息（金额 / 数字）</td><td>蓝色双线 + 等宽字体</td></tr><tr><td>虚线下划线 <code>○</code></td><td>时间节点</td><td>绿色点线 + 圆圈</td></tr></tbody></table>
+<p>不靠颜色区分，所以黑白打印、截图转灰也分得清。标记说明收在卡片右上角的 <strong>ⓘ</strong> 里（点开才显示），旁边的「灰度自检」可以一键验证。</p>
+<p>另外：</p>
+<ul><li><code>待确认</code> 标签 = 原文只是「应该 / 可能 / 我再问问」这类说法，不是定论</li><li><code>未给原文摘句</code> 标签 = 这条是模型概括的，没有原文可核对，建议点「问」追问</li><li><code>已作废</code> 标签 = 这条被取消了，整行划掉</li></ul>
+<hr>
+<h2>十一、卡片上能动手的地方</h2>
+<table><thead><tr><th>位置</th><th>点一下会怎样</th></tr></thead><tbody><tr><td>要点/风险前的圆圈</td><td>标记「我理解了」，变绿勾 + 「已知悉」</td></tr><tr><td>待办前的圆圈</td><td>标记「做完了」，整行划掉，顶部徽章变 <code>1/4 项待办</code></td></tr><tr><td><code>▸ 原文</code></td><td>展开它依据的原文摘句</td></tr><tr><td><code>问</code></td><td>就地追问这一条（只依据原文回答，答不出会说「原文没写」）</td></tr><tr><td>卡片顶部 <code>结论 1 / 要点 5 / 待办 3 / 风险 2</code></td><td>目录 chips：点一下滚到那一块并闪一下，空块是灰的</td></tr><tr><td><code>ⓘ</code>（卡片右上）</td><td>展开/收起工程信息（类型、字数、tokens）和标记说明</td></tr><tr><td><code>展开原文</code>（卡片右上）</td><td>所有摘句一次全开</td></tr><tr><td><code>灰度自检</code></td><td>整卡转灰，检查标记是否还认得出</td></tr><tr><td><code>复制卡片</code>（卡片右下）</td><td>复制成纯文本，粘微信/Word 都行</td></tr></tbody></table>
+<p>勾选状态存在本地，刷新、从历史回看都还在。</p>
+<hr>
+<h2>十、大屏右栏：原文对照</h2>
+<p>屏幕够宽（≥ 1440px）时，右侧会多出「原文对照」面板，页面变成三栏：</p>
+<ul><li><strong>全文</strong>：这次导入/粘贴的原文，逐条显示 <code>时间 发送人 内容</code></li><li><strong>大纲</strong>：卡片的四个区块，点标题直接滚到那一块</li><li>在卡片里点某条的「原文」，右栏会自动切到全文并<strong>高亮那一句</strong>，方便立刻核对</li><li>右上角「收起」可以折叠，折叠状态会被记住；窄屏（笔记本 1080p、手机）自动隐藏，不占地方</li></ul>
+<blockquote><p><b class="lbl">提示　</b>这块只是把核对成本降到零，不改任何提炼结果。</p></blockquote>
+<h2>十三、桌宠：小鲸汐</h2>
+<p>左下角那条小鲸鱼是个能问话的助手。它不会自己动你的数据，只做两件事：<strong>读原文</strong>、<strong>回答你的问题</strong>。</p>
+<table><thead><tr><th>动作</th><th>结果</th></tr></thead><tbody><tr><td>自动</td><td>提炼完成后它会说「读完了，问我吧」，此时它手里就是这次的原文</td></tr><tr><td>点它一下</td><td>弹出对话面板，顶上写着它读到了多少字、几条消息</td></tr><tr><td>输入问题</td><td>比如「押金多少钱、谁交、什么时候交」，它只按原文回答，原文没写就直说没写</td></tr><tr><td>拖着走</td><td>按住能拖到任意位置，位置会记住（下次打开还在那儿）</td></tr><tr><td>顶栏小鲸鱼按钮</td><td>藏起来 / 叫回来，状态会记住</td></tr><tr><td>闲置 90 秒</td><td>它会闭眼打盹（zzz），动一下鼠标就醒</td></tr><tr><td><code>Esc</code></td><td>先收对话面板；再按才动附件</td></tr></tbody></table>
+<p>它和卡片里每条下面的「问」是同一套提示词（只依据原文、数字照抄、原文没写就说没写），区别是：卡片里的「问」针对<strong>某一条</strong>，桌宠针对<strong>整段原文</strong>。</p>
+<blockquote><p><b class="lbl">提示　</b>每次问它都会把原文一起发出去（和提炼时一样），所以别把不该外发的原文喂给它。</p></blockquote>
+<h3>它还能帮你存文件</h3>
+<p>面板里有一排小按钮，点一下就把当前卡片落成文件：</p>
+<table><thead><tr><th>按钮</th><th>存出来的是</th><th>用途</th></tr></thead><tbody><tr><td><code>卡片.md</code></td><td>结论 / 关键信息 / 待办表 / 风险，带原文摘句</td><td>丢进笔记软件、Obsidian、飞书文档</td></tr><tr><td><code>待办.csv</code></td><td>负责人 / 事项 / 截止时间 / 是否完成</td><td>Excel、Numbers 直接开</td></tr><tr><td><code>日历.ics</code></td><td>把每条待办的截止日建成日程</td><td>双击导入系统日历，到点会提醒</td></tr><tr><td><code>原文.txt</code></td><td>这次导入的整段原文</td><td>存档、发给别人核对</td></tr></tbody></table>
+<p>也可以直接对它说：<strong>「把待办导出成 csv」</strong>「做成日历」「存一份原文」——它自己会挑格式，不用点按钮。</p>
+<p>说「<strong>帮我写一份周报/纪要/通知</strong>」，它会先按原文起草正文，再自动存成 <code>.md</code>。</p>
+<p><strong>文件存到哪？</strong></p>
+<ul><li>浏览器支持「另存为」时（Chrome / Edge），会弹出保存对话框，<strong>你可以直接选桌面</strong>；</li><li>不支持或没弹窗时，退回到浏览器默认下载文件夹（一般在「下载」里）。</li></ul>
+<blockquote><p><b class="lbl">提示　</b>浏览器网页没有权限直接往任意路径写文件、也没法操作别的程序 —— 这就是网页能做到的上限：生成文件 + 让你选存哪。真要「自动放进 D 盘某个文件夹」，得装桌面端。</p></blockquote>
+<h3>换个形象</h3>
+<p>点面板里的「形象」：</p>
+<ul><li>三个内置：<strong>小鲸汐 / 小海猫 / 小水母</strong>，点一下立刻换，眼睛照样跟着鼠标转</li><li>想用自己的图，三种上传方式任选：</li><li><b style="color:#2f57e0">1.</b> 点「上传图片」，选一张图</li><li><b style="color:#2f57e0">2.</b> 把图片<strong>直接拖到左下角的桌宠身上</strong>（拖到上面会提示「松手换形象」）</li><li><b style="color:#2f57e0">3.</b> 复制一张图，页面上按 <code>Ctrl + V</code> 粘贴</li><li>规格建议：<strong>正方形、透明背景 PNG，256×256 就够</strong>，最大 3 MB；<strong>GIF 动图也能用</strong>，会自己动</li><li>大图会自动等比缩到 512 以内再存，不占地方</li><li>「恢复默认」回到小鲸汐</li></ul>
+<p>图片只存在你这台电脑的浏览器里（<code>localStorage</code> 优先，<code>IndexedDB</code> 兜底），不会上传到任何服务器。</p>
+<h2>十四、历史、主题、快捷键</h2>
+<table><thead><tr><th>想干嘛</th><th>怎么做</th></tr></thead><tbody><tr><td>换一份新内容</td><td>左侧「新建提炼」，或 <code>Ctrl/⌘ + N</code></td></tr><tr><td>提炼完还想改原文</td><td>输入框会自己收成一行摘要（<code>原文 2977 字 · 聊天记录</code>），点右边「展开」恢复编辑</td></tr><tr><td>历史满了要清空</td><td>计数到 <code>20 / 20</code> 时旁边出现「清理」，点一下清空（会先问你一次）</td></tr><tr><td>找以前的提炼</td><td>左侧历史（最近 20 条），按 今天 / 昨天 / 更早 分组</td></tr><tr><td>折叠一组历史</td><td>点组头（「今天」「昨天」那一行），状态会记住</td></tr><tr><td>删掉一条历史</td><td>鼠标移到那条右边的 <code>×</code>（一直都在，不用 hover 才出现）</td></tr><tr><td>回看某一次的卡片</td><td>点历史里的那一条</td></tr><tr><td>快速提炼</td><td><code>Ctrl / ⌘ + Enter</code></td></tr><tr><td>深色 / 浅色</td><td>右上角太阳 / 月亮，会记住选择</td></tr><tr><td>换解析器</td><td>点附件那行的 chip</td></tr><tr><td>移除附件</td><td>附件那行「移除」，或操作行「移除附件」，或直接按 <code>Esc</code></td></tr><tr><td>收起样例卡</td><td>空状态右上角「收起」；想再看到就点「显示样例卡」</td></tr></tbody></table>
+<hr>
+<h2>十五、提炼规则：能保证什么</h2>
+<ul><li><strong>要点带说话人</strong>：写「老王要求周六九点前到」，不写「要求周六九点前到」</li><li><strong>含糊不算定论</strong>：说「应该」「可能」的，会被标成 <code>待确认</code> 并额外进一条风险</li><li><strong>时间换绝对日期</strong>：原文的「明天 / 周五 / 下周一」会按消息最后一天换算成「周五（11-13）」</li><li><strong>保真</strong>：人名、数字、金额、时间照抄原文，不许取整、不许换说法</li><li><strong>可追溯</strong>：每条要点配原文摘句；给不出的会标「未给原文摘句」</li></ul>
+<hr>
+<h2>十六、隐私和成本</h2>
+<ul><li>只有你粘/拖进来的原文会发给 DeepSeek，工具本身不收集任何东西</li><li>涉密内容、身份证号、银行卡号、密码，<strong>先打码再粘</strong></li><li><code>deepseek-chat</code> 很便宜，一次提炼几分钱；卡片右下角会显示本次 tokens，自己心里有数</li><li>记得去 DeepSeek 平台设置<strong>消费上限</strong></li></ul>
+<hr>
+<h2>十七、出问题先看这张表</h2>
+<table><thead><tr><th>现象</th><th>原因 / 怎么办</th></tr></thead><tbody><tr><td>「还没有 Key」</td><td>点右上角钥匙图标填一个</td></tr><tr><td>「连不上 DeepSeek」</td><td>断网、被防火墙拦、浏览器扩展挡了跨域；换网络或关掉拦截扩展</td></tr><tr><td>「Key 无效（401）」</td><td>Key 粘错或过期，重新填</td></tr><tr><td>「余额不足（402）」</td><td>去平台充值，或换 Key</td></tr><tr><td>「请求太频繁（429）」</td><td>等十几秒再点</td></tr><tr><td>「返回的不是合法 JSON」</td><td>模型偶尔跑偏，再点一次就好</td></tr><tr><td>「啥也没提炼出来」</td><td>内容太短太碎，或类型选错了</td></tr><tr><td>拖文件提示「不是纯文本」</td><td>Word / PDF / 图片读不了，另存为 <code>.txt</code> 再拖</td></tr><tr><td>拖文件提示「超过 2 MB」</td><td>单个文件上限 2 MB，切小再拖</td></tr><tr><td>chip 显示「合并转发」但 0 条</td><td>你复制的是卡片本体，按第五节双击卡片再全选复制</td></tr><tr><td>附件删不掉 / 移除了又回来</td><td>已经修了（旧版是异步读完把它塞回来）；用「移除附件」按钮或直接按 <code>Esc</code></td></tr><tr><td>复制提示「浏览器不让自动复制」</td><td>极少见，页面会把文本摆出来，<code>Ctrl/⌘ + C</code> 手动拷</td></tr></tbody></table>
+<hr>
+<h2>十八、它不能做什么（已知限制）</h2>
+<ul><li><strong>不吃截图</strong>：多张滚动截图的 OCR 拼接没做（要塞十几 MB 的 OCR 引擎，跟"双击即用"冲突）。截图请自己转成文字，或用第五节的全选复制</li><li><strong>不连数据库</strong>：不读微信 / QQ 本地聊天库，只认你给的文件和粘贴内容</li><li><strong>格式有版本差异</strong>：微信不同版本、手机端和 PC 端复制出来的格式不完全一样。遇到解析不出来的，把那段原文发我，我加进解析规则</li><li><strong>质量取决于原文</strong>：原文含糊，卡片也只能反映含糊（会标出来，不会替它编）</li></ul>
+<hr>
+<h2>十九、想自己改</h2>
+<table><thead><tr><th>想改什么</th><th>改哪</th></tr></thead><tbody><tr><td>提示词（要点条数、说话人规则、话题分块…）</td><td><code>prompts.js</code></td></tr><tr><td>高亮规则（哪些词算「需确认」）</td><td><code>app.js</code> 里的 <code>MARK_RE</code></td></tr><tr><td>语气词表 / 判断规则</td><td><code>tone.js</code></td></tr><tr><td>解析规则（新的导出格式）</td><td><code>parse.js</code>，合并转发相关的在 <code>parsers/merged-forward.js</code></td></tr><tr><td>配色 / 圆角 / 间距</td><td><code>style.css</code> 最上面的 <code>:root</code> 变量</td></tr><tr><td>换模型</td><td><code>app.js</code> 顶部 <code>MODEL</code>（默认 <code>deepseek-chat</code>）</td></tr></tbody></table>
+<p>改完存盘，刷新页面就生效，没有构建步骤。</p>
+<hr>
+<h2>二十、想自己验一遍</h2>
+<p>工具自带 105 项自动化自测（用无头浏览器跑，不花 API 额度）：</p>
+<pre><code>node selftest.mjs</code></pre>
+<p>全绿就是功能都正常，截图和报告会落在同目录。</p>
+<p>手工验收只需要四条：</p>
+<ul><li><b style="color:#2f57e0">1.</b> 填 Key → 点一个样例 → 10 秒内出四块卡片</li><li><b style="color:#2f57e0">2.</b> 拖一个微信 HTML 进去 → chip 显示「微信HTML」，条数对得上</li><li><b style="color:#2f57e0">3.</b> 复制一段合并转发 → 粘进来 → chip 显示「合并转发」，发送人还原出来</li><li><b style="color:#2f57e0">4.</b> 打开「语气标注」→ 消息后面出现 <code>（催促）</code> 这类括号，点 <code>×</code> 能删掉</li></ul>
+<hr>
+<p>有任何一条对不上，就把原文、截图或控制台报错发我，我按你那条改。</p>
+</body></html>
