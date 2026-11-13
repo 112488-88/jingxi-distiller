@@ -144,7 +144,7 @@ async function runSelfTest() {
   let res;
   selfTestMode = true;
   try {
-    const { CHECK_SOURCE } = require('./tools/selftest.js');
+    const { CHECK_SOURCE } = require('./tests/selftest.js');
     res = await win.webContents.executeJavaScript(CHECK_SOURCE, true);
   } catch (e) {
     dialog.showErrorBox('自检没跑起来', String((e && e.message) || e));
@@ -387,7 +387,7 @@ function createWindow() {
       await new Promise((r) => setTimeout(r, 1800));
       selfTestMode = true;
       try {
-        const { CHECK_SOURCE } = require('./tools/selftest.js');
+        const { CHECK_SOURCE } = require('./tests/selftest.js');
         const res = await win.webContents.executeJavaScript(CHECK_SOURCE, true);
         fs.writeFileSync(outPath, JSON.stringify({ at: new Date().toISOString(), version: app.getVersion(), ...res }, null, 2));
       } catch (e) {

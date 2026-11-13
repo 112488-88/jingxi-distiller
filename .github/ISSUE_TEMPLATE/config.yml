@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 使用说明（先看这个）
+    url: https://github.com/112488-88/jingxi-distiller/blob/main/docs/manual/manual.md
+    about: 怎么填 Key、支持哪些导入格式、出问题先查这张表
+  - name: 在线版直接用
+    url: https://112488-88.github.io/jingxi-distiller/
+    about: 不想装东西的话，浏览器里就能用（可安装成 App）
+  - name: 安全与隐私问题
+    url: https://github.com/112488-88/jingxi-distiller/security/policy
+    about: Key 泄露、数据安全相关，请走这里而不是公开 issue

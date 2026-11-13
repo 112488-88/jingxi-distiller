@@ -1,5 +1,11 @@
 # 鲸汐提炼器 · 消息重点提取
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-3f6bfa.svg)](LICENSE)
+[![在线版](https://img.shields.io/badge/在线版-GitHub%20Pages-3f6bfa)](https://112488-88.github.io/jingxi-distiller/)
+[![桌面版](https://img.shields.io/github/v/release/112488-88/jingxi-distiller?label=windows%20desktop&color=3f6bfa)](../../releases)
+[![零依赖](https://img.shields.io/badge/deps-0-success)](package.json)
+[![PWA](https://img.shields.io/badge/PWA-offline%20ready-5a5aff)](manifest.webmanifest)
+
 把一段乱糟糟的消息，压成**结论 · 关键信息 · 待办 · 风险**四块卡片，10 秒看完。
 粘聊天记录、拖微信/QQ 导出文件、贴通知公文都行，还能对着原文提问。
 
@@ -8,6 +14,18 @@
 > 本工具不内置任何 API Key。你在设置里填自己的 [DeepSeek](https://platform.deepseek.com/) Key，它只存在你浏览器本地。
 
 ![提炼结果](assets/screenshots/card.png)
+
+## 目录
+
+- [它能做什么](#它能做什么)
+- [快速开始](#快速开始)：[直接用](#方式一直接用) · [本地起服务](#方式二本地起服务能安装成-app) · [在线用](#方式三在线用) · [Windows 桌面版](#方式四windows-桌面版exe)
+- [部署](#部署)
+- [项目结构](#项目结构)
+- [开发](#开发)
+- [隐私](#隐私)
+- [已知限制](#已知限制)
+- [文档](#文档)
+- [参与](#参与)
 
 ## 它能做什么
 
@@ -87,10 +105,16 @@ parsers/merged-forward.js  合并转发识别
 manifest.webmanifest       PWA 清单
 sw.js                      离线缓存
 assets/                    图标与截图
-deploy/                    部署方案与后端代理示例
-docs/                      使用说明（pdf/docx/md）、开发日志、笔记
+deploy/                    部署方案与后端代理示例（Worker / nginx / PHP）
+docs/
+  ├─ manual/               使用说明四件套（md 为源，另出 docx/pdf/html）
+  ├─ devlog.md             开发日志：每一步做了什么、踩了什么坑
+  └─ frontend-notes.md     前端实现笔记
 scripts/                   打包分享版的小工具
-desktop/                   Windows 桌面版（Electron 外壳，网页本体不复制）
+desktop/                   Windows 桌面版（Electron 外壳，网页本体打包时复制，不重复入库）
+  ├─ main.js               主进程：窗口 / 菜单 / 右键 / 打印 / 自检 / 下载
+  ├─ scripts/prepare-app.mjs  打包前把根目录网页复制进 desktop/app
+  └─ tests/                冒烟 + 回归 + 内置自检（不花 API 额度）
 ```
 
 ## 开发
@@ -121,10 +145,18 @@ npm run pack      # 打包分享版 zip 到 dist/
 
 ## 文档
 
-- 用户手册：[docs/manual.pdf](docs/manual.pdf) · [Markdown 版](docs/manual.md)
+- 全部文档导航：[docs/README.md](docs/README.md)
+- 用户手册：[docs/manual.pdf](docs/manual.pdf) · [Markdown 版](docs/manual/manual.md)
 - 开发日志（逐步做了什么、踩过哪些坑）：[docs/devlog.md](docs/devlog.md)
 - 前端「效果」学习笔记：[docs/frontend-notes.md](docs/frontend-notes.md)
-- 版本变更：[CHANGELOG.md](CHANGELOG.md) · 如何贡献：[CONTRIBUTING.md](CONTRIBUTING.md) · 安全说明：[SECURITY.md](SECURITY.md)
+- 版本变更：[CHANGELOG.md](CHANGELOG.md)
+
+## 参与
+
+- 想提需求或报问题：走 [Issues](../../issues/new/choose)（有模板；别在 issue 里贴真实聊天原文和 Key）
+- 想改代码：先看 [CONTRIBUTING.md](CONTRIBUTING.md)，提交前跑 `node scripts/check-privacy.mjs --all`
+- 行为准则：[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- 安全问题（Key 泄露、数据泄漏）：[SECURITY.md](SECURITY.md)，别开公开 issue
 
 ## 许可
 

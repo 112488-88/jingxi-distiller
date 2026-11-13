@@ -18,7 +18,7 @@
 
 - **内置自检**：菜单「帮助 → 运行自检」，用假数据点一遍主要按钮（不花 API 额度），结束后原样恢复 Key / 历史 / 主题 / 桌宠形象，报告写到 `%APPDATA%\鲸汐提炼器\self-test-*.json`
 - 命令行自检：`鲸汐提炼器.exe --selftest=<输出 json>`，跑完自行退出，方便自动化和排障
-- 回归脚本入仓：`desktop/tools/e2e.js`、`e2e2.js`（覆盖提炼 / 复制 / 导出 / 拖文件 / 主题 / 桌宠上传 / 历史回看 / 微信 CSV / 桌宠问答 / 快捷键）
+- 回归脚本入仓：`desktop/tests/e2e.js`、`e2e2.js`（覆盖提炼 / 复制 / 导出 / 拖文件 / 主题 / 桌宠上传 / 历史回看 / 微信 CSV / 桌宠问答 / 快捷键）
 
 ## [1.1.0] - 2026-11-13
 
@@ -30,7 +30,7 @@ Windows 桌面版：不用浏览器也能开。
 - 桌面版比网页版多出来的：独立窗口 + 任务栏图标、窗口大小/位置/最大化记忆（换屏不会跑出屏幕）、单实例、`Alt` 唤出菜单、外链交给系统浏览器、拖文件不会把窗口导航走、`F12` 开发者工具
 - 数据位置从「跟着浏览器走」改成软件自己的目录：`%APPDATA%\鲸汐提炼器\`（Key / 历史 / 桌宠形象 / 主题）
 - 对 `api.deepseek.com` 的响应补 CORS 头做兜底（`file://` 下 Origin 为 `null`），剪贴板、另存为、全屏权限直接放行
-- 桌面版自测：`desktop/tools/smoke.js`（界面渲染 / localStorage / 剪贴板 / 另存为 / DeepSeek 连通）、`desktop/tools/persist-test.js`（localStorage 两阶段持久化验证）
+- 桌面版自测：`desktop/tests/smoke.js`（界面渲染 / localStorage / 剪贴板 / 另存为 / DeepSeek 连通）、`desktop/tests/persist-test.js`（localStorage 两阶段持久化验证）
 
 ### 变更
 

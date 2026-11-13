@@ -15,9 +15,9 @@
     "dist:portable": "node scripts/prepare-app.mjs && electron-builder --win portable --x64",
     "dist:nsis": "node scripts/prepare-app.mjs && electron-builder --win nsis --x64",
     "dist:dir": "node scripts/prepare-app.mjs && electron-builder --win dir --x64",
-    "smoke": "electron tools/smoke.js",
-    "smoke:persist-write": "electron tools/persist-test.js --phase=write",
-    "smoke:persist-read": "electron tools/persist-test.js --phase=read"
+    "smoke": "electron tests/smoke.js",
+    "smoke:persist-write": "electron tests/persist-test.js --phase=write",
+    "smoke:persist-read": "electron tests/persist-test.js --phase=read"
   },
   "devDependencies": {
     "electron": "^33.4.11",
@@ -35,7 +35,7 @@
       "main.js",
       "package.json",
       "app/**/*",
-      "tools/selftest.js",
+      "tests/selftest.js",
       "build/icon.ico"
     ],
     "asar": true,

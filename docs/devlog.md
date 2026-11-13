@@ -204,7 +204,7 @@
 | `prompts.js` | 提示词（提炼 + 追问），想调效果只改这个文件 |
 | `docs\前端效果学习.md` | 从 GitHub 上学到的前端「有效果」规律 + 自查差距 + 下一步清单 |
 | `使用说明.md` | **给用户看的使用说明**（源头），要改文案改这个 |
-| `docs/manual.docx` / `.pdf` / `.html` | 上面那份的三种成品；生成脚本不在本仓库内（一次性工具） |
+| `docs/manual/manual.docx` / `.pdf` / `.html` | 上面那份的三种成品；生成脚本不在本仓库内（一次性工具） |
 
 ## 改提示词
 
@@ -320,6 +320,6 @@ node selftest.mjs
 | 下载同名自动改名、存完能打开目录 | 直接覆盖 | `will-download` 里加序号，存完给「打开所在文件夹」 |
 | 出问题能自己查 | 只能猜 | 内置自检：`帮助 → 运行自检`，假数据点一遍按钮，跑完还原用户数据；另有 `--selftest=<json>` 命令行模式 |
 
-自检脚本 `desktop/tools/selftest.js` 的关键设计：进页面先把 `localStorage` 整份快照、把 `fetch`/`showSaveFilePicker` 存下来，`finally` 里原样恢复，并清掉自检期间产生的下载（落到 `userData/self-test-downloads`）。不然「帮你查问题」反倒把用户的 Key 和历史冲了。
+自检脚本 `desktop/tests/selftest.js` 的关键设计：进页面先把 `localStorage` 整份快照、把 `fetch`/`showSaveFilePicker` 存下来，`finally` 里原样恢复，并清掉自检期间产生的下载（落到 `userData/self-test-downloads`）。不然「帮你查问题」反倒把用户的 Key 和历史冲了。
 
 验证方式也换了一轮：dev 模式跑通不算，直接给打好的 exe 加 `--remote-debugging-port`，用 CDP 在真渲染进程里点按钮；再让 exe 自己 `--selftest` 跑一遍。两次都是 14/14。踩到的坑：`Set-Content -Encoding UTF8` 会给 JSON 加 BOM，electron-builder 读 `package.json` 直接报 `readObjectStart: expect { or n`；改版本号要用无 BOM 写。

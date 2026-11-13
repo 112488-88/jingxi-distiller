@@ -27,7 +27,7 @@ const FILES = [
   'assets/icon-512.png',
   'assets/favicon-32.png',
   'docs/manual.pdf',
-  'docs/manual.html',
+  'docs/manual/manual.html',
   'README.md',
   'LICENSE'
 ];

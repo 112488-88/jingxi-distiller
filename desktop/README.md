@@ -68,8 +68,8 @@ npm run smoke            # 冒烟：界面渲染 / localStorage / 剪贴板 / �
 npm run smoke:persist-write   # 写入 localStorage
 npm run smoke:persist-read    # 重启后再读，验证落盘
 
-npx electron tools/e2e.js     # 回归 ①：提炼 / 复制 / 导出 / 拖文件 / 主题 / 桌宠 / 快捷键
-npx electron tools/e2e2.js    # 回归 ②：IndexedDB / 导出下载 / 桌宠上传形象 / 历史回看 / CSV 识别 / 问答
+npx electron tests/e2e.js     # 回归 ①：提炼 / 复制 / 导出 / 拖文件 / 主题 / 桌宠 / 快捷键
+npx electron tests/e2e2.js    # 回归 ②：IndexedDB / 导出下载 / 桌宠上传形象 / 历史回看 / CSV 识别 / 问答
 
 # 命令行自检（打包后也能跑）：结果写 JSON，进程自己退出
 鲸汐提炼器.exe --selftest=C:\temp\selftest.json
@@ -94,7 +94,7 @@ desktop/
 ├─ main.js               主进程：窗口、菜单、单实例、窗口状态、CORS 兜底、外链/下载
 ├─ scripts/
 │  └─ prepare-app.mjs    从仓库根复制网页本体到 desktop/app/
-├─ tools/
+├─ tests/
 │  ├─ selftest.js        内置自检脚本（帮助菜单调用，也能 --selftest 命令行跑）
 │  ├─ smoke.js           冒烟测试（截图 + 能力探测）
 │  ├─ e2e.js             功能回归 ①：提炼/复制/导出/拖文件/主题/桌宠/快捷键

@@ -1,0 +1,31 @@
+version: 2
+
+updates:
+  # 桌面版外壳的构建依赖（electron / electron-builder）—— 只有这里有 npm 依赖
+  - package-ecosystem: npm
+    directory: /desktop
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: chore(deps)
+    labels:
+      - dependencies
+    ignore:
+      # Electron 大版本升级要跟着改主进程 API 与打包验证，手动来
+      - dependency-name: electron
+        update-types:
+          - version-update:semver-major
+      - dependency-name: electron-builder
+        update-types:
+          - version-update:semver-major
+
+  # GitHub Actions 版本
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore(ci)
+    labels:
+      - dependencies

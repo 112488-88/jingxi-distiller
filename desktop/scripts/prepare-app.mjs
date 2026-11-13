@@ -25,7 +25,7 @@ const FILES = [
 ];
 const DIRS = ['parsers'];
 // 额外搬进 app/ 的说明文档（菜单「打开使用说明」用）
-const EXTRA = [['docs/manual.pdf', 'manual.pdf'], ['docs/manual.html', 'manual.html']];
+const EXTRA = [['docs/manual.pdf', 'manual.pdf'], ['docs/manual/manual.html', 'manual.html']];
 
 function clean() {
   if (fs.existsSync(OUT)) fs.rmSync(OUT, { recursive: true, force: true });
