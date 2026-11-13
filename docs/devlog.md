@@ -289,3 +289,21 @@ node selftest.mjs
 ```
 
 截图和 `selftest-report.json` 落在同目录。
+
+## 桌面版（1.1.0，2026-11-13）
+
+网上用 GitHub Pages + 安装成 PWA 这条路对熟人够用，对「双击就要能用」的人还是绕。所以加了 `desktop/`：Electron 33 外壳，出便携版单文件 exe 和安装包。
+
+几个决定：
+
+- **网页本体不复制**。`desktop/scripts/prepare-app.mjs` 在打包前从仓库根把 `index.html` / `app.js` / `style.css` … 复制进 `desktop/app/`，这个目录进 `.gitignore`。宁可多一步脚本，也不要两份副本各改各的。
+- **PWA 那段代码留着不动**。`initPwa()` 里判断了 `location.protocol`，`file://` 下不挂 manifest、不注册 Service Worker，桌面壳里自然跳过，网页版照常。
+- **数据位置换到软件自己的目录**（`%APPDATA%\鲸汐提炼器\`）。localStorage 在 Electron 里照样能用，但归属跟着 app 走，不跟浏览器抢，也不怕用户清浏览器数据。
+- **窗口细节**：记住大小/位置/最大化（保存前夹到工作区内，防拔掉外接屏后跑到屏幕外）、单实例、外链交系统浏览器、`will-navigate` 拦住拖文件导致的导航、`Alt` 唤菜单、`F12` 调试。
+- **CORS 兜底**：`file://` 下 `Origin: null`，DeepSeek 本来就回 `access-control-allow-origin: null`（见上文），但用 `webRequest.onHeadersReceived` 补一层 `*`，换网络环境或接口调整时不容易翻车。
+- **图标**：不另画，直接拿 `assets/icon-512.png` 生成 16–256 七档 ico，跟 PWA 图标同一套。
+- **打包**：electron-builder，`appId com.jingxi.refiner`，portable 走 `requestExecutionLevel: user`，nsis 允许改安装目录。没买证书，SmartScreen 会提示未知发布者，文档里写了怎么绕过。
+
+自测（`desktop/tools/`，入库，不花 API 额度）：`smoke.js` 加载页面截图并探测 localStorage / 剪贴板 / 另存为 / DeepSeek 连通（401 即通）；`persist-test.js` 分 write / read 两次启动验证 localStorage 真落盘。
+
+打包环境踩到三个坑，都记进 `desktop/README.md` 了：`ELECTRON_RUN_AS_NODE` 会让 electron 退化成 Node；npm ≥ 11 默认拦 install 脚本导致 electron 二进制没下；winCodeSign 解压要符号链接权限（非管理员会失败）。

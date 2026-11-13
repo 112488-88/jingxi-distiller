@@ -12,8 +12,14 @@ desktop.ini
 .idea/
 *.swp
 
-# 依赖（本项目零依赖，留着以防万一）
+# 依赖（网页本体零依赖；desktop/ 里的 electron 依赖不进仓库）
 node_modules/
+
+# 桌面版（desktop/）：app/ 由 scripts/prepare-app.mjs 从根目录生成，打包产物也不进仓库
+desktop/app/
+desktop/dist/
+desktop/dist-smoke/
+desktop/node_modules/
 
 # 本地私密配置（服务端代填 Key 用的，绝不能提交）
 config.js

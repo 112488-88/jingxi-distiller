@@ -2,6 +2,24 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.1.0] - 2026-11-13
+
+Windows 桌面版：不用浏览器也能开。
+
+### 新增
+
+- `desktop/`：Electron 外壳，产出**便携版单文件 exe**（双击即开）和**安装包**（桌面/开始菜单快捷方式、可卸载）
+- 桌面版比网页版多出来的：独立窗口 + 任务栏图标、窗口大小/位置/最大化记忆（换屏不会跑出屏幕）、单实例、`Alt` 唤出菜单、外链交给系统浏览器、拖文件不会把窗口导航走、`F12` 开发者工具
+- 数据位置从「跟着浏览器走」改成软件自己的目录：`%APPDATA%\鲸汐提炼器\`（Key / 历史 / 桌宠形象 / 主题）
+- 对 `api.deepseek.com` 的响应补 CORS 头做兜底（`file://` 下 Origin 为 `null`），剪贴板、另存为、全屏权限直接放行
+- 桌面版自测：`desktop/tools/smoke.js`（界面渲染 / localStorage / 剪贴板 / 另存为 / DeepSeek 连通）、`desktop/tools/persist-test.js`（localStorage 两阶段持久化验证）
+
+### 变更
+
+- 桌面版不复制网页本体：`desktop/scripts/prepare-app.mjs` 打包前从根目录复制到 `desktop/app/`（已 gitignore），PWA 与桌面版永远同源
+- `README` 增加「方式四：Windows 桌面版」与桌面版打包说明；项目结构补 `desktop/`
+- 桌面图标由 `assets/icon-512.png` 生成多尺寸 `desktop/build/icon.ico`，与 PWA 图标同一套
+
 ## [1.0.0] - 2026-11-12
 
 第一个可发布版本。

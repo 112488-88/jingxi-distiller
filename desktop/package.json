@@ -1,0 +1,71 @@
+{
+  "name": "jingxi-distiller-desktop",
+  "productName": "鲸汐提炼器",
+  "version": "1.1.0",
+  "description": "鲸汐提炼器的 Windows 桌面外壳（Electron）：网页本体在仓库根目录，这里只负责窗口、菜单和打包",
+  "main": "main.js",
+  "author": "jingxi-distiller",
+  "license": "MIT",
+  "private": true,
+  "homepage": "https://github.com/112488-88/jingxi-distiller",
+  "scripts": {
+    "prepare:app": "node scripts/prepare-app.mjs",
+    "start": "node scripts/prepare-app.mjs && electron .",
+    "dist": "node scripts/prepare-app.mjs && electron-builder --win portable nsis --x64",
+    "dist:portable": "node scripts/prepare-app.mjs && electron-builder --win portable --x64",
+    "dist:nsis": "node scripts/prepare-app.mjs && electron-builder --win nsis --x64",
+    "dist:dir": "node scripts/prepare-app.mjs && electron-builder --win dir --x64",
+    "smoke": "electron tools/smoke.js",
+    "smoke:persist-write": "electron tools/persist-test.js --phase=write",
+    "smoke:persist-read": "electron tools/persist-test.js --phase=read"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.jingxi.refiner",
+    "productName": "鲸汐提炼器",
+    "copyright": "jingxi-distiller contributors",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "app/**/*",
+      "build/icon.ico"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "app/manual.*"
+    ],
+    "compression": "normal",
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "portable": {
+      "artifactName": "鲸汐提炼器-${version}-便携版.${ext}",
+      "unicode": true,
+      "requestExecutionLevel": "user"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "鲸汐提炼器",
+      "artifactName": "鲸汐提炼器-${version}-安装版.${ext}",
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

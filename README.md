@@ -3,7 +3,7 @@
 把一段乱糟糟的消息，压成**结论 · 关键信息 · 待办 · 风险**四块卡片，10 秒看完。
 粘聊天记录、拖微信/QQ 导出文件、贴通知公文都行，还能对着原文提问。
 
-纯前端 · 零依赖 · 零构建 · 双击就能用 · 可安装成 App（PWA）
+纯前端 · 零依赖 · 零构建 · 双击就能用 · 可安装成 App（PWA）· 也有 Windows 桌面版
 
 > 本工具不内置任何 API Key。你在设置里填自己的 [DeepSeek](https://platform.deepseek.com/) Key，它只存在你浏览器本地。
 
@@ -46,6 +46,21 @@ npm run serve       # 等价于 python -m http.server 8000
 用 GitHub Pages 部署后（见下），打开 `https://<用户名>.github.io/<仓库名>/`，
 Chrome / Edge 地址栏右侧会出现「安装」图标 → 装成独立窗口的 App，**离线也能打开**。
 
+### 方式四：Windows 桌面版（exe）
+
+不想每次找浏览器、不想把 Key 存在浏览器里，就用桌面版：独立窗口、任务栏图标、窗口大小会记住，数据落在软件自己的配置目录（`%APPDATA%\鲸汐提炼器\`）。
+
+- 成品：到 [Releases](../../releases) 下 `鲸汐提炼器-<版本>-便携版.exe`（单文件，双击即开）或 `-安装版.exe`
+- 自己打包：
+
+```bash
+cd desktop
+npm install
+npm run dist        # 出便携版 + 安装版到 desktop/dist/
+```
+
+网页本体还是仓库根这一份，`desktop/` 只是 Electron 外壳，打包前会把根目录文件复制进去，两边永远同源。细节、自测脚本和打包踩坑见 [`desktop/README.md`](desktop/README.md)。
+
 ## 部署
 
 仓库自带 workflow：[`.github/workflows/pages.yml`](.github/workflows/pages.yml)。
@@ -73,6 +88,7 @@ assets/                    图标与截图
 deploy/                    部署方案与后端代理示例
 docs/                      使用说明（pdf/docx/md）、开发日志、笔记
 scripts/                   打包分享版的小工具
+desktop/                   Windows 桌面版（Electron 外壳，网页本体不复制）
 ```
 
 ## 开发
@@ -89,7 +105,7 @@ npm run pack      # 打包分享版 zip 到 dist/
 
 ## 隐私
 
-- 不上传任何数据：历史、Key、标记、桌宠形象全部存在浏览器的 localStorage
+- 不上传任何数据：历史、Key、标记、桌宠形象全部存在本机（浏览器 localStorage；桌面版存在 `%APPDATA%\鲸汐提炼器\`）
 - 只有你粘贴 / 导入的原文会发给 DeepSeek（提炼与提问都需要）
 - 没有统计、埋点、第三方脚本，没有 CDN 依赖
 
