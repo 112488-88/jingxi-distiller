@@ -1,7 +1,7 @@
 {
   "name": "jingxi-distiller-desktop",
   "productName": "鲸汐提炼器",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "鲸汐提炼器的 Windows 桌面外壳（Electron）：网页本体在仓库根目录，这里只负责窗口、菜单和打包",
   "main": "main.js",
   "author": "jingxi-distiller",
@@ -35,6 +35,7 @@
       "main.js",
       "package.json",
       "app/**/*",
+      "tools/selftest.js",
       "build/icon.ico"
     ],
     "asar": true,

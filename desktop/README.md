@@ -43,15 +43,18 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 ## 外壳比浏览器打开多出来的东西
 
 - 独立窗口 + 任务栏图标（图标由 `assets/icon-512.png` 生成多尺寸 `build/icon.ico`，跟 PWA 图标同一套）
-- 窗口大小/位置/最大化状态会记住；换屏幕、拔外接屏都不会跑到屏幕外
+- **菜单栏默认显示**（文件 / 编辑 / 视图 / 帮助），不再按 Alt 才出来
+- **右键菜单**：输入框里是撤销 / 重做 / 剪切 / 复制 / 粘贴 / 粘贴为纯文本 / 全选；选中有文字时能复制或丢给浏览器搜索；右键链接能打开或复制地址；右键图片能复制或另存
+- **打印**：`Ctrl+P` 或菜单「打印卡片…」，走系统打印对话框（网页版这块是浏览器给的）
+- **窗口状态记忆**：大小 / 位置 / 最大化都会记住，换屏幕、拔外接屏都不会跑到屏幕外
 - 单实例：再点一次只是把已开的窗口叫到前面
-- 菜单栏按 `Alt` 唤出（默认隐藏）：新建提炼 / 打开使用说明 / 打开配置文件夹 / 缩放 / 全屏 / 开发者工具（`F12`）
 - 网页里的外链交给系统浏览器，不会在软件内跳走；拖文件也不会把窗口导航到别处
-- 导出走系统「另存为」；blob 下载兜底落到系统「下载」文件夹并提示
-- `localStorage` 落在软件自己的配置目录，不再跟着浏览器走：
+- **导出 PDF/图片以外的东西**：优先弹系统「另存为」；兜底下载落到系统「下载」文件夹，**同名文件自动加序号不覆盖**，存完弹「打开所在文件夹」
+- `localStorage` 与 IndexedDB 落在软件自己的配置目录，不再跟着浏览器走：
   Windows 是 `%APPDATA%\鲸汐提炼器\`（Key、历史 20 条、桌宠形象、主题都在这里，删掉即清空）
 - 对 `api.deepseek.com` 的响应补 CORS 头做兜底（`file://` 下 Origin 为 `null` 的情况）
 - 剪贴板、另存为、全屏等权限直接放行，不弹 Chromium 授权框
+- **内置自检**：菜单「帮助 → 运行自检」会用假数据点一遍主要按钮（不花 API 额度），跑完自动恢复你的 Key / 历史 / 主题 / 桌宠形象，报告写在 `%APPDATA%\鲸汐提炼器\self-test-*.json`
 
 网页本体本身零改动：PWA 那段 `initPwa()` 在 `file://` 下自动跳过 Service Worker 和 manifest，正好适合桌面壳。
 
@@ -60,12 +63,19 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 ```bash
 cd desktop
 npm run prepare:app
-npm run smoke                     # 界面渲染 / localStorage / 剪贴板 / 另存为 / DeepSeek 连通（401 = 通）
-npm run smoke:persist-write       # 写入 localStorage
-npm run smoke:persist-read        # 重启后再读，验证落盘
+
+npm run smoke            # 冒烟：界面渲染 / localStorage / 剪贴板 / 另存为 / DeepSeek 连通（401 = 通）
+npm run smoke:persist-write   # 写入 localStorage
+npm run smoke:persist-read    # 重启后再读，验证落盘
+
+npx electron tools/e2e.js     # 回归 ①：提炼 / 复制 / 导出 / 拖文件 / 主题 / 桌宠 / 快捷键
+npx electron tools/e2e2.js    # 回归 ②：IndexedDB / 导出下载 / 桌宠上传形象 / 历史回看 / CSV 识别 / 问答
+
+# 命令行自检（打包后也能跑）：结果写 JSON，进程自己退出
+鲸汐提炼器.exe --selftest=C:\temp\selftest.json
 ```
 
-截图和日志落在 `desktop/dist-smoke/`（已忽略）。
+截图和报告落在 `desktop/dist-smoke/`（已忽略）。
 
 ## 打包踩过的坑
 
@@ -85,7 +95,10 @@ desktop/
 ├─ scripts/
 │  └─ prepare-app.mjs    从仓库根复制网页本体到 desktop/app/
 ├─ tools/
+│  ├─ selftest.js        内置自检脚本（帮助菜单调用，也能 --selftest 命令行跑）
 │  ├─ smoke.js           冒烟测试（截图 + 能力探测）
+│  ├─ e2e.js             功能回归 ①：提炼/复制/导出/拖文件/主题/桌宠/快捷键
+│  ├─ e2e2.js            功能回归 ②：IndexedDB/下载/上传形象/历史/CSV/问答
 │  └─ persist-test.js    localStorage 持久化两阶段验证
 ├─ build/
 │  └─ icon.ico           由 assets/icon-512.png 生成（16/24/32/48/64/128/256）

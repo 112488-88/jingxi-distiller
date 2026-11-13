@@ -1,6 +1,6 @@
 {
   "name": "jingxi-distiller",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "把聊天记录 / 邮件 / 通知压成「结论·要点·待办·风险」四块卡片的纯前端工具（PWA，另有 Windows 桌面版）",
   "keywords": ["pwa", "deepseek", "chat-log", "summarize", "meeting-minutes", "offline", "electron", "windows"],

@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, Menu, shell, session, dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell, session, dialog, clipboard } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 
@@ -11,6 +11,7 @@ const ICON = path.join(__dirname, 'build', 'icon.ico');
 const APP_TITLE = '鲸汐提炼器';
 
 let win = null;
+let selfTestMode = false;
 
 /* ── 窗口状态记忆 ───────────────────────────────────── */
 const statePath = () => path.join(app.getPath('userData'), 'window-state.json');
@@ -71,21 +72,35 @@ function installNetworkTweaks() {
   ses.setPermissionRequestHandler((_wc, _permission, cb) => cb(true));
   if (ses.setPermissionCheckHandler) ses.setPermissionCheckHandler(() => true);
 
-  // 下载（例如导出 .md/.txt 走 blob 的备用路径）
+  // 下载（导出 .md/.txt 走 blob 兜底路径时）：不覆盖同名文件，存完给「打开所在文件夹」
   ses.on('will-download', (_e, item) => {
-    const name = item.getFilename();
-    item.setSavePath(path.join(app.getPath('downloads'), name));
+    const dir = selfTestMode
+      ? path.join(app.getPath('userData'), 'self-test-downloads')
+      : app.getPath('downloads');
+    try { fs.mkdirSync(dir, { recursive: true }); } catch { /* 忽略 */ }
+    const raw = item.getFilename() || '导出.txt';
+    const ext = path.extname(raw);
+    const base = path.basename(raw, ext);
+    let target = path.join(dir, raw);
+    for (let i = 1; fs.existsSync(target); i++) target = path.join(dir, `${base} (${i})${ext}`);
+
+    item.setSavePath(target);
     item.once('done', (_evt, state) => {
-      if (state === 'completed' && win) {
-        win.webContents.send('download-done', name);
-        dialog.showMessageBox(win, {
+      if (state !== 'completed' || !win || win.isDestroyed()) return;
+      if (selfTestMode) return; // 自检不打扰用户
+      dialog
+        .showMessageBox(win, {
           type: 'info',
           title: '已保存',
-          message: '文件已保存到下载文件夹',
-          detail: `${name}\n${path.join(app.getPath('downloads'), name)}`,
-          buttons: ['好'],
+          message: '导出的文件已经存好',
+          detail: target,
+          buttons: ['打开所在文件夹', '好'],
+          defaultId: 1,
+          cancelId: 1,
+        })
+        .then((r) => {
+          if (r.response === 0) shell.showItemInFolder(target);
         });
-      }
     });
   });
 }
@@ -105,6 +120,64 @@ function openGuide() {
   else if (fs.existsSync(html)) shell.openPath(html);
 }
 
+/* ── 打印 / 自检 ────────────────────────────────────── */
+function printPage() {
+  if (!win || win.isDestroyed()) return;
+  win.webContents.print({ silent: false, printBackground: true }, (ok, reason) => {
+    if (!ok && reason) console.warn('[打印]', reason);
+  });
+}
+
+async function runSelfTest() {
+  if (!win || win.isDestroyed()) return;
+  const ask = await dialog.showMessageBox(win, {
+    type: 'question',
+    title: '运行自检',
+    message: '会临时清空输入框，并用假数据点一遍主要按钮（不消耗 API 额度）',
+    detail: '你的 Key、历史、主题、桌宠形象等本地数据会在自检结束后原样恢复。',
+    buttons: ['开始自检', '取消'],
+    defaultId: 0,
+    cancelId: 1,
+  });
+  if (ask.response !== 0) return;
+
+  let res;
+  selfTestMode = true;
+  try {
+    const { CHECK_SOURCE } = require('./tools/selftest.js');
+    res = await win.webContents.executeJavaScript(CHECK_SOURCE, true);
+  } catch (e) {
+    dialog.showErrorBox('自检没跑起来', String((e && e.message) || e));
+    return;
+  } finally {
+    setTimeout(() => { selfTestMode = false; }, 4000);
+  }
+
+  const outFile = path.join(app.getPath('userData'), `self-test-${Date.now()}.json`);
+  try {
+    fs.mkdirSync(path.dirname(outFile), { recursive: true });
+    fs.writeFileSync(outFile, JSON.stringify({ at: new Date().toISOString(), version: app.getVersion(), ...res }, null, 2));
+  } catch { /* 写不了就只显示结果 */ }
+
+  const steps = (res && res.steps) || [];
+  const fail = steps.filter((s) => !s.ok);
+  dialog
+    .showMessageBox(win, {
+      type: fail.length ? 'warning' : 'info',
+      title: '自检结果',
+      message: `${steps.length - fail.length}/${steps.length} 项通过`,
+      detail: fail.length
+        ? `没通过的：${fail.map((f) => f.name).join('、')}\n\n报告：${outFile}`
+        : `主要功能都正常。\n\n报告：${outFile}`,
+      buttons: ['打开报告', '好'],
+      defaultId: fail.length ? 0 : 1,
+      cancelId: 1,
+    })
+    .then((r) => {
+      if (r.response === 0) shell.openPath(outFile);
+    });
+}
+
 function buildMenu() {
   const template = [
     {
@@ -117,6 +190,8 @@ function buildMenu() {
             if (win) win.webContents.executeJavaScript("document.getElementById('newBtn') && document.getElementById('newBtn').click();", true).catch(() => {});
           },
         },
+        { type: 'separator' },
+        { label: '打印卡片…', accelerator: 'CmdOrCtrl+P', click: printPage },
         { type: 'separator' },
         { label: '打开使用说明', click: openGuide },
         { label: '打开配置文件夹', click: () => shell.openPath(app.getPath('userData')) },
@@ -151,6 +226,8 @@ function buildMenu() {
     {
       label: '帮助',
       submenu: [
+        { label: '运行自检（不花 API 额度）', click: runSelfTest },
+        { type: 'separator' },
         {
           label: '关于鲸汐提炼器',
           click: () => {
@@ -187,7 +264,7 @@ function createWindow() {
     title: APP_TITLE,
     backgroundColor: '#f5f6f8',
     icon: fs.existsSync(ICON) ? ICON : undefined,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -223,10 +300,67 @@ function createWindow() {
     dialog.showErrorBox('加载出错', `${desc} (${code})\n${url}`);
   });
 
-  // 无边框拖拽 / 打印等调用系统能力
-  win.webContents.on('before-input-event', (_e, input) => {
+  // 右键菜单：网页版这块是浏览器白送的，桌面壳得自己给
+  win.webContents.on('context-menu', (_e, params) => {
+    const items = [];
+    const flags = params.editFlags || {};
+
+    if (params.isEditable) {
+      items.push({ label: '撤销', role: 'undo', enabled: !!flags.canUndo });
+      items.push({ label: '重做', role: 'redo', enabled: !!flags.canRedo });
+      items.push({ type: 'separator' });
+      items.push({ label: '剪切', role: 'cut', enabled: !!flags.canCut });
+      items.push({ label: '复制', role: 'copy', enabled: !!flags.canCopy });
+      items.push({ label: '粘贴', role: 'paste', enabled: !!flags.canPaste });
+      items.push({ label: '粘贴为纯文本', click: () => {
+        const text = clipboard.readText();
+        if (text) win.webContents.insertText(text);
+      } });
+      items.push({ type: 'separator' });
+      items.push({ label: '全选', role: 'selectAll' });
+    } else if ((params.selectionText || '').trim()) {
+      items.push({ label: '复制', role: 'copy' });
+      items.push({
+        label: '用浏览器搜索选中内容',
+        click: () => {
+          const q = encodeURIComponent(params.selectionText.trim().slice(0, 100));
+          shell.openExternal('https://www.bing.com/search?q=' + q);
+        },
+      });
+    }
+
+    if (params.linkURL) {
+      if (items.length) items.push({ type: 'separator' });
+      items.push({ label: '在浏览器中打开链接', click: () => shell.openExternal(params.linkURL) });
+      items.push({ label: '复制链接地址', click: () => clipboard.writeText(params.linkURL) });
+    }
+
+    if (params.mediaType === 'image' && params.srcURL) {
+      if (items.length) items.push({ type: 'separator' });
+      items.push({ label: '复制图片', click: () => win.webContents.copyImageAt(params.x, params.y) });
+      items.push({ label: '另存图片…', click: () => win.webContents.downloadURL(params.srcURL) });
+    }
+
+    if (!items.length) return;
+    items.push({ type: 'separator' });
+    items.push({ label: '刷新界面', click: () => win.webContents.reload() });
+    if (process.env.WHALE_DEBUG_CTX) console.log('[ctx-menu] editable=' + params.isEditable + ' items=' + items.length);
+    Menu.buildFromTemplate(items).popup({ window: win });
+  });
+
+  // 键盘：F12 调试、Ctrl+P 打印（网页版靠浏览器，这里自己接）
+  win.webContents.on('before-input-event', (e, input) => {
     if (input.type !== 'keyDown') return;
-    if (input.key === 'F12') win.webContents.toggleDevTools();
+    const ctrl = input.control || input.meta;
+    if (input.key === 'F12') {
+      win.webContents.toggleDevTools();
+      e.preventDefault();
+      return;
+    }
+    if (ctrl && !input.shift && (input.key === 'p' || input.key === 'P')) {
+      e.preventDefault();
+      printPage();
+    }
   });
 
   const remember = () => {
@@ -244,6 +378,25 @@ function createWindow() {
   win.on('move', remember);
   win.on('close', remember);
   win.on('closed', () => { win = null; });
+
+  // 命令行自检：xxx.exe --selftest=<输出文件>  —— 给自动化/排障用，跑完直接退出
+  const selfArg = process.argv.find((a) => a.startsWith('--selftest'));
+  if (selfArg) {
+    const outPath = selfArg.includes('=') ? selfArg.split('=').slice(1).join('=') : path.join(app.getPath('temp'), 'whale-selftest.json');
+    win.webContents.once('did-finish-load', async () => {
+      await new Promise((r) => setTimeout(r, 1800));
+      selfTestMode = true;
+      try {
+        const { CHECK_SOURCE } = require('./tools/selftest.js');
+        const res = await win.webContents.executeJavaScript(CHECK_SOURCE, true);
+        fs.writeFileSync(outPath, JSON.stringify({ at: new Date().toISOString(), version: app.getVersion(), ...res }, null, 2));
+      } catch (e) {
+        try { fs.writeFileSync(outPath, JSON.stringify({ error: String((e && e.stack) || e) }, null, 2)); } catch {}
+      }
+      selfTestMode = false;
+      app.exit(0);
+    });
+  }
 }
 
 /* ── 生命周期 ───────────────────────────────────────── */

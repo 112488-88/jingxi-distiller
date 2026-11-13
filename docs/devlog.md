@@ -307,3 +307,19 @@ node selftest.mjs
 自测（`desktop/tools/`，入库，不花 API 额度）：`smoke.js` 加载页面截图并探测 localStorage / 剪贴板 / 另存为 / DeepSeek 连通（401 即通）；`persist-test.js` 分 write / read 两次启动验证 localStorage 真落盘。
 
 打包环境踩到三个坑，都记进 `desktop/README.md` 了：`ELECTRON_RUN_AS_NODE` 会让 electron 退化成 Node；npm ≥ 11 默认拦 install 脚本导致 electron 二进制没下；winCodeSign 解压要符号链接权限（非管理员会失败）。
+
+## 桌面版 1.1.1：把「浏览器白送的东西」补回来（2026-11-13）
+
+第一版能开、能提炼、能拖文件，但试用的反馈是「很多原来的功能用不了」。原因不在网页本体，而在**桌面壳少了浏览器默认提供的那一层**：
+
+| 网页版靠浏览器 | 桌面版得自己给 | 补法 |
+|---|---|---|
+| 右键菜单（复制/粘贴/全选） | 没有 | `webContents.on('context-menu')` 按 `isEditable` / `selectionText` / `linkURL` / `mediaType` 动态建菜单 |
+| `Ctrl+P` 打印 | 没反应 | 菜单项 + `before-input-event` 拦 `Ctrl+P` → `webContents.print` |
+| 菜单栏（常驻可见） | 藏在 `Alt` 后面，等于没有 | `autoHideMenuBar: false` |
+| 下载同名自动改名、存完能打开目录 | 直接覆盖 | `will-download` 里加序号，存完给「打开所在文件夹」 |
+| 出问题能自己查 | 只能猜 | 内置自检：`帮助 → 运行自检`，假数据点一遍按钮，跑完还原用户数据；另有 `--selftest=<json>` 命令行模式 |
+
+自检脚本 `desktop/tools/selftest.js` 的关键设计：进页面先把 `localStorage` 整份快照、把 `fetch`/`showSaveFilePicker` 存下来，`finally` 里原样恢复，并清掉自检期间产生的下载（落到 `userData/self-test-downloads`）。不然「帮你查问题」反倒把用户的 Key 和历史冲了。
+
+验证方式也换了一轮：dev 模式跑通不算，直接给打好的 exe 加 `--remote-debugging-port`，用 CDP 在真渲染进程里点按钮；再让 exe 自己 `--selftest` 跑一遍。两次都是 14/14。踩到的坑：`Set-Content -Encoding UTF8` 会给 JSON 加 BOM，electron-builder 读 `package.json` 直接报 `readObjectStart: expect { or n`；改版本号要用无 BOM 写。
