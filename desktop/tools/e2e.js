@@ -14,10 +14,10 @@ const OUT = path.join(ROOT, 'dist-smoke');
 const FAKE_CONTENT = JSON.stringify({
   conclusion: '测试结论：项目按期上线，接口联调是唯一卡点。',
   points: [
-    { text: '张伟负责接口联调，周三前完成', evidence: '张伟：接口我周三前搞定' },
-    { text: '设计稿预计本周四定稿', evidence: '李娜：设计稿周四给' },
+    { text: '同事A负责接口联调，周三前完成', evidence: '同事A：接口我周三前搞定' },
+    { text: '设计稿预计本周四定稿', evidence: '同事B：设计稿周四给' },
   ],
-  todos: [{ owner: '张伟', task: '完成接口联调', deadline: '周三' }],
+  todos: [{ owner: '同事A', task: '完成接口联调', deadline: '周三' }],
   risks: [{ text: '设计稿还没定稿，可能拖到下周', evidence: '设计稿还在改' }],
 });
 
@@ -99,7 +99,7 @@ async function main() {
     const saveBtn = document.getElementById('keySave');
     if (saveBtn) saveBtn.click();
     const ta = document.getElementById('input');
-    setVal(ta, '张伟：接口我周三前搞定。李娜：设计稿周四给，还在改。');
+    setVal(ta, '同事A：接口我周三前搞定。同事B：设计稿周四给，还在改。');
     return { chars: ta.value.length, keySaved: !!localStorage.getItem('msgcard.apikey') };`);
   rec('填 Key / 原文', r && r.chars > 10, JSON.stringify(r));
   await sleep(500);
@@ -156,7 +156,7 @@ async function main() {
   r = await evalJs(`
     const before = document.getElementById('input').value;
     const dt = new DataTransfer();
-    dt.items.add(new File(['2026-11-12 14:30:27 张三(10001)\\n今天下午三点开会，把报价单发一下。'], 'sample.txt', { type: 'text/plain' }));
+    dt.items.add(new File(['2026-11-12 14:30:27 甲同学(10001)\\n今天下午三点开会，把报价单发一下。'], 'sample.txt', { type: 'text/plain' }));
     ['dragenter','dragover','drop'].forEach(t => window.dispatchEvent(new DragEvent(t, { bubbles: true, dataTransfer: dt })));
     await new Promise(r => setTimeout(r, 1200));
     const after = document.getElementById('input').value;
@@ -194,7 +194,7 @@ async function main() {
   r = await evalJs(`
     const ta = document.getElementById('input');
     const d = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value');
-    d.set.call(ta, '王五：预算 12 万，下周一前报。');
+    d.set.call(ta, '丙同学：预算 12 万，下周一前报。');
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     const before = (window.__fetchCalls || []).length;
     ta.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', ctrlKey: true, bubbles: true }));

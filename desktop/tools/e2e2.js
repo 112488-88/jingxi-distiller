@@ -12,8 +12,8 @@ const OUT = path.join(ROOT, 'dist-smoke');
 
 const FAKE = JSON.stringify({
   conclusion: '测试结论：项目按期上线。',
-  points: [{ text: '张伟负责接口联调', evidence: '张伟：接口我搞定' }],
-  todos: [{ owner: '张伟', task: '完成接口联调', deadline: '周三' }],
+  points: [{ text: '同事A负责接口联调', evidence: '同事A：接口我搞定' }],
+  todos: [{ owner: '同事A', task: '完成接口联调', deadline: '周三' }],
   risks: [{ text: '设计稿没定稿', evidence: '还在改' }],
 });
 
@@ -79,7 +79,7 @@ async function main() {
     };
     setVal(document.getElementById('keyInput'), 'sk-test-1234567890abcdef');
     document.getElementById('keySave').click();
-    setVal(document.getElementById('input'), '张伟：接口我搞定。李娜：设计稿还在改。');
+    setVal(document.getElementById('input'), '同事A：接口我搞定。同事B：设计稿还在改。');
     return true;`);
   await sleep(400);
   await js(`document.getElementById('run').click(); return true;`);
@@ -157,7 +157,7 @@ async function main() {
   r = await js(`
     document.getElementById('clear') && document.getElementById('clear').click();
     await new Promise(r => setTimeout(r, 300));
-    const csv = 'StrTime,StrContent,NickName\\n2026-11-12 14:30:27,接口我周三前搞定,张伟\\n2026-11-12 14:31:02,设计稿周四给,李娜\\n';
+    const csv = 'StrTime,StrContent,NickName\\n2026-11-12 14:30:27,接口我周三前搞定,同事A\\n2026-11-12 14:31:02,设计稿周四给,同事B\\n';
     const dt = new DataTransfer();
     dt.items.add(new File([csv], 'wechat.csv', { type: 'text/csv' }));
     ['dragenter','dragover','drop'].forEach(t => window.dispatchEvent(new DragEvent(t, { bubbles: true, dataTransfer: dt })));

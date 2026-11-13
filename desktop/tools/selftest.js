@@ -64,8 +64,8 @@ const CHECK_SOURCE = `(async () => {
     window.fetch = () => Promise.resolve(new Response(JSON.stringify({
       choices: [{ message: { content: JSON.stringify({
         conclusion: '自检：链路正常。',
-        points: [{ text: '接口联调周三前完成', evidence: '张伟：周三前搞定' }],
-        todos: [{ owner: '张伟', task: '接口联调', deadline: '周三' }],
+        points: [{ text: '接口联调周三前完成', evidence: '同事A：周三前搞定' }],
+        todos: [{ owner: '同事A', task: '接口联调', deadline: '周三' }],
         risks: [{ text: '设计稿没定稿', evidence: '还在改' }]
       }) }, finish_reason: 'stop' }],
       usage: { prompt_tokens: 900, completion_tokens: 130, total_tokens: 1030 }
@@ -75,7 +75,7 @@ const CHECK_SOURCE = `(async () => {
     if ($('keyInput')) { setVal($('keyInput'), 'sk-selftest-000000000000'); }
     if ($('keySave')) $('keySave').click();
     step('保存 Key', !!localStorage.getItem('msgcard.apikey'));
-    setVal($('input'), '张伟：接口周三前搞定。李娜：设计稿还在改。');
+    setVal($('input'), '同事A：接口周三前搞定。同事B：设计稿还在改。');
     step('输入原文', $('input').value.length > 10);
 
     $('run').click();
@@ -105,7 +105,7 @@ const CHECK_SOURCE = `(async () => {
       if (clearBtn) clearBtn.click();
       await sleep(200);
       const dt = new DataTransfer();
-      dt.items.add(new File(['2026-11-12 14:30:27 张三(10001)\\n三点开会，带报价单。'], 'a.txt', { type: 'text/plain' }));
+      dt.items.add(new File(['2026-11-12 14:30:27 甲同学(10001)\\n三点开会，带报价单。'], 'a.txt', { type: 'text/plain' }));
       ['dragenter', 'dragover', 'drop'].forEach(t => window.dispatchEvent(new DragEvent(t, { bubbles: true, dataTransfer: dt })));
       await sleep(1200);
       step('拖文件载入', $('input').value.length > 5, 'len=' + $('input').value.length);
@@ -116,7 +116,7 @@ const CHECK_SOURCE = `(async () => {
       if ($('clear')) $('clear').click();
       await sleep(200);
       const dt2 = new DataTransfer();
-      dt2.items.add(new File(['StrTime,StrContent,NickName\\n2026-11-12 14:30:27,接口周三前搞定,张伟\\n'], 'w.csv', { type: 'text/csv' }));
+      dt2.items.add(new File(['StrTime,StrContent,NickName\\n2026-11-12 14:30:27,接口周三前搞定,同事A\\n'], 'w.csv', { type: 'text/csv' }));
       ['dragenter', 'dragover', 'drop'].forEach(t => window.dispatchEvent(new DragEvent(t, { bubbles: true, dataTransfer: dt2 })));
       await sleep(1400);
       step('识别微信 CSV', /微信/.test(document.body.innerText));
@@ -152,7 +152,7 @@ const CHECK_SOURCE = `(async () => {
     // Ctrl+Enter
     try {
       const ta = $('input');
-      setVal(ta, '王五：预算 12 万，下周一前报。');
+      setVal(ta, '丙同学：预算 12 万，下周一前报。');
       await sleep(150);
       ta.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', ctrlKey: true, bubbles: true }));
       await sleep(2200);
